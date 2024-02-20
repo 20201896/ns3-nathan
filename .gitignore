@@ -1,0 +1,8 @@
+.config
+pybindgen*
+
+*.pyc
+*.diff
+*.orig
+*.patch
+*.rej
