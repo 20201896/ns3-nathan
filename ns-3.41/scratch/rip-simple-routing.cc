@@ -72,9 +72,10 @@ TearDownLink(Ptr<Node> nodeA, Ptr<Node> nodeB, uint32_t interfaceA, uint32_t int
 int
 main(int argc, char** argv)
 {
-    bool verbose = false;
-    bool printRoutingTables = false;
-    bool showPings = false;
+    bool verbose = true;
+    bool printRoutingTables = true;
+    bool showPings = true;
+
     std::string SplitHorizon("SplitHorizon");
  
     CommandLine cmd(__FILE__);
@@ -153,6 +154,7 @@ main(int argc, char** argv)
     RipHelper ripRouting;
  
     // Rule of thumb:
+
     // Interfaces are added sequentially, starting from 0
     // However, interface 0 is always the loopback...
     ripRouting.ExcludeInterface(a, 1);
