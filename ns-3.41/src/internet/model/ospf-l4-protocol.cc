@@ -50,7 +50,7 @@ OspfL4Protocol::~OspfL4Protocol(){
 
 // GetTypeId
 TypeId OspfL4Protocol::GetTypeId() {
-    static TypeId tid = TypeId("ns3::OspfProtocol")
+    static TypeId tid = TypeId("ns3::OspfL4Protocol")
                             .SetParent<IpL4Protocol>()
                             .SetGroupName("Internet")
                             .AddConstructor<OspfL4Protocol>();
