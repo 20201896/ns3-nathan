@@ -132,14 +132,50 @@ class OspfL4Protocol : public IpL4Protocol {
 
   protected:
 
-    void DoDispose() override;
-
-    /*
-     * This function will notify other components connected to the node that a new stack member is
-     * now connected This will be used to notify Layer 3 protocol of layer 4 protocol stack to
-     * connect them together.
+    /**
+     * Notify all Objects aggregated to this one of a new Object being
+     * aggregated.
+     *
+     * This method is invoked whenever two sets of Objects are aggregated
+     * together.  It is invoked exactly once for each Object in both sets.
+     * This method can be overridden by subclasses who wish to be notified
+     * of aggregation events. These subclasses must chain up to their
+     * base class NotifyNewAggregate() method.
+     *
+     * It is safe to call GetObject() and AggregateObject() from within
+     * ththeis method.
      */
     void NotifyNewAggregate() override;
+
+    /**
+     * Initialize() implementation.
+     *
+     * This method is called only once by Initialize(). If the user
+     * calls Initialize() multiple times, DoInitialize() is called only the
+     * first time.
+     *
+     * Subclasses are expected to override this method and chain up
+     * to their parent's implementation once they are done. It is
+     * safe to call GetObject() and AggregateObject() from within this method.
+     */
+    void DoInitialize() override;
+
+    /**
+     * Destructor implementation.
+     *
+     * This method is called by Dispose() or by the Object's
+     * destructor, whichever comes first.
+     *
+     * Subclasses are expected to implement their real destruction
+     * code in an overridden version of this method and chain
+     * up to their parent's implementation once they are done.
+     * _i.e_, for simplicity, the destructor of every subclass should
+     * be empty and its content should be moved to the associated
+     * DoDispose() method.
+     *
+     * It is safe to call GetObject() from within this method.
+     */
+    void DoDispose() override;
 
   private:
     Ptr<Node> m_node;                    //!< The node this stack is associated with

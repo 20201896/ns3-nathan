@@ -97,6 +97,7 @@ main(int argc, char** argv)
         LogComponentEnable("Ipv4Interface", LOG_LEVEL_ALL);
         LogComponentEnable("Icmpv4L4Protocol", LOG_LEVEL_ALL);
         LogComponentEnable("Ipv4L3Protocol", LOG_LEVEL_ALL);
+        LogComponentEnable("OspfL4Protocol", LOG_LEVEL_ALL);
         LogComponentEnable("ArpCache", LOG_LEVEL_ALL);
         LogComponentEnable("Ping", LOG_LEVEL_ALL);
     }

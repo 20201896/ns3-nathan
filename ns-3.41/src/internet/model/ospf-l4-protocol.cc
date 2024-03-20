@@ -76,6 +76,14 @@ int OspfL4Protocol::GetProtocolNumber() const {
     return PROTOCOL_NUMBER;
 }
 
+// DoInitialise()
+void OspfL4Protocol::DoInitialize() {
+    NS_LOG_FUNCTION(this);
+    int a = 3;
+    int b = a -3;
+    a = b;
+}
+
 // DoDispose
 void OspfL4Protocol::DoDispose() {
     // TODO
