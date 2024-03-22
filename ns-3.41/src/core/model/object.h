@@ -243,7 +243,7 @@ class Object : public SimpleRefCount<Object, ObjectBase, ObjectDeleter>
      * base class NotifyNewAggregate() method.
      *
      * It is safe to call GetObject() and AggregateObject() from within
-     * this method.
+     * ththeis method.
      */
     virtual void NotifyNewAggregate();
     /**

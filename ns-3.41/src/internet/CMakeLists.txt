@@ -79,6 +79,9 @@ set(source_files
     model/ipv6.cc
     model/loopback-net-device.cc
     model/ndisc-cache.cc
+    model/ospf-header.cc
+    model/ospf-l4-protocol.cc
+    model/ospf-routing-table-entry.cc
     model/rip-header.cc
     model/rip.cc
     model/ripng-header.cc
@@ -204,6 +207,9 @@ set(header_files
     model/ipv6.h
     model/loopback-net-device.h
     model/ndisc-cache.h
+    model/ospf-header.h
+    model/ospf-l4-protocol.h
+    model/ospf-routing-table-entry.h
     model/rip-header.h
     model/rip.h
     model/ripng-header.h

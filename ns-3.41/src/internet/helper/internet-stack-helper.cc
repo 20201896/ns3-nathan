@@ -294,9 +294,12 @@ InternetStackHelper::CreateAndAggregateObjectFromTypeId(Ptr<Node> node, const st
     node->AggregateObject(protocol);
 }
 
-void
-InternetStackHelper::Install(Ptr<Node> node) const
-{
+
+/*
+ * MRG: We need to add OSPF as a Ipv4LProtocol somewhere in here in order that
+ *
+ */
+void InternetStackHelper::Install(Ptr<Node> node) const {
     if (m_ipv4Enabled)
     {
         /* IPv4 stack */
@@ -349,6 +352,10 @@ InternetStackHelper::Install(Ptr<Node> node) const
         CreateAndAggregateObjectFromTypeId(node, "ns3::TrafficControlLayer");
         CreateAndAggregateObjectFromTypeId(node, "ns3::UdpL4Protocol");
         CreateAndAggregateObjectFromTypeId(node, "ns3::TcpL4Protocol");
+        // MRG: Here I think will plug us into the L3 functionality
+        // Potentially, we can work this way (without a socket because we are not
+        // passing data back up to an application above us )
+        CreateAndAggregateObjectFromTypeId(node, "ns3::OspfL4Protocol");
         if (!node->GetObject<PacketSocketFactory>())
         {
             Ptr<PacketSocketFactory> factory = CreateObject<PacketSocketFactory>();
