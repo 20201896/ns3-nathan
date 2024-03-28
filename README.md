@@ -3,10 +3,14 @@
 Mark Greenwood, Liverpool Hope University 2024.
 
 All internal .git directories have been removed and git init rerun
+
 Additionally, the scratch folder .gitignore has been removed since we will be 
 building our simulation scripts there and want to maintain history.
 For the 3rd Year Project. We will be adding OSPF into the model and helper folders under 
 internet.
+
+---------------------------------------------------------------------------------------
+
 
 ## _Old READ.ME continues_ ##
 
