@@ -53,6 +53,21 @@ uint32_t OspfHeader::Deserialize(Buffer::Iterator start) {
     // TODO
     return 0;
 }
-
+void OspfHeader::EnableChecksums(){
+    m_calcChecksum = true;
+}
+void OspfHeader::InitializeChecksum(Ipv4Address source, Ipv4Address destination, uint8_t protocol){
+    m_source = source;
+    m_destination = destination;
+    m_protocol = protocol;
+}
+void OspfHeader::SetDestinationPort(uint16_t port)
+{
+    m_destinationPort = port;
+}
+void OspfHeader::SetSourcePort(uint16_t port)
+{
+    m_sourcePort = port;
+}
 
 }

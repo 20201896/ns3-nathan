@@ -20,12 +20,15 @@
 
 #include "ip-l4-protocol.h"
 #include "ipv6-end-point-demux.h"
+#include "ipv4.h"
 
 #include "ns3/packet.h"
 #include "ns3/ptr.h"
 
 #include <stdint.h>
 #include <unordered_map>
+
+#include "loopback-net-device.h"
 
 namespace ns3 {
 
@@ -130,6 +133,26 @@ class OspfL4Protocol : public IpL4Protocol {
      */
     IpL4Protocol::DownTargetCallback6 GetDownTarget6() const override;
 
+    /**
+     * Destructor implementation.
+     *
+     * This method is called by Dispose() or by the Object's
+     * destructor, whichever comes first.
+     *
+     * Subclasses are expected to implement their real destruction
+     * code in an overridden version of this method and chain
+     * up to their parent's implementation once they are done.
+     * _i.e_, for simplicity, the destructor of every subclass should
+     * be empty and its content should be moved to the associated
+     * DoDispose() method.
+     *
+     * It is safe to call GetObject() from within this method.
+     */
+
+    //void Send(Ptr<Packet> packet, Ipv4Address saddr, Ipv4Address daddr, uint16_t sport, uint16_t dport);
+
+    Ipv4EndPoint* Allocate(Ipv4Address address);
+
   protected:
 
     /**
@@ -157,23 +180,6 @@ class OspfL4Protocol : public IpL4Protocol {
      * Subclasses are expected to override this method and chain up
      * to their parent's implementation once they are done. It is
      * safe to call GetObject() and AggregateObject() from within this method.
-     */
-    void DoInitialize() override;
-
-    /**
-     * Destructor implementation.
-     *
-     * This method is called by Dispose() or by the Object's
-     * destructor, whichever comes first.
-     *
-     * Subclasses are expected to implement their real destruction
-     * code in an overridden version of this method and chain
-     * up to their parent's implementation once they are done.
-     * _i.e_, for simplicity, the destructor of every subclass should
-     * be empty and its content should be moved to the associated
-     * DoDispose() method.
-     *
-     * It is safe to call GetObject() from within this method.
      */
     void DoDispose() override;
 

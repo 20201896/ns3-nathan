@@ -27,6 +27,8 @@
 #include "ns3/object-map.h"
 #include "ns3/packet.h"
 
+#include "ospf-header.h"
+
 #include <unordered_map>
 
 namespace ns3 {
@@ -39,7 +41,7 @@ const uint8_t OspfL4Protocol::PROTOCOL_NUMBER = 89;
 
 
 // Constructor
-OspfL4Protocol::OspfL4Protocol() : m_endPoints(new Ipv4EndPointDemux()), m_endPoints6(new Ipv6EndPointDemux()) {
+OspfL4Protocol::OspfL4Protocol() : m_endPoints(new Ipv4EndPointDemux()), m_endPoints6(new Ipv6EndPointDemux()){
     NS_LOG_FUNCTION(this);
 }
 
@@ -76,17 +78,24 @@ int OspfL4Protocol::GetProtocolNumber() const {
     return PROTOCOL_NUMBER;
 }
 
-// DoInitialise()
-void OspfL4Protocol::DoInitialize() {
-    NS_LOG_FUNCTION(this);
-    int a = 3;
-    int b = a -3;
-    a = b;
-}
-
 // DoDispose
 void OspfL4Protocol::DoDispose() {
     // TODO
+    NS_LOG_FUNCTION(this);
+    if (m_endPoints != nullptr)
+    {
+        delete m_endPoints;
+        m_endPoints = nullptr;
+    }
+    if (m_endPoints6 != nullptr)
+    {
+        delete m_endPoints6;
+        m_endPoints6 = nullptr;
+    }
+    m_node = nullptr;
+    m_downTarget.Nullify();
+    m_downTarget6.Nullify();
+    IpL4Protocol::DoDispose();
 }
 
 // NotifyNewAggregate
@@ -156,6 +165,32 @@ IpL4Protocol::DownTargetCallback OspfL4Protocol::GetDownTarget() const {
 IpL4Protocol::DownTargetCallback6 OspfL4Protocol::GetDownTarget6() const {
     NS_LOG_FUNCTION(this);
     return m_downTarget6;
+}
+
+/*
+void OspfL4Protocol::Send(Ptr<Packet> packet, Ipv4Address saddr, Ipv4Address daddr, uint16_t sport, uint16_t dport)
+{
+    NS_LOG_FUNCTION(this << packet << saddr << daddr << sport << dport);
+
+    OspfHeader ospfHeader;
+    if (Node::ChecksumEnabled())
+    {
+        ospfHeader.EnableChecksums();
+        ospfHeader.InitializeChecksum(saddr, daddr, OspfL4Protocol::PROTOCOL_NUMBER);
+    }
+    ospfHeader.SetDestinationPort(dport);
+    ospfHeader.SetSourcePort(sport);
+
+    packet->AddHeader(ospfHeader);
+
+    m_downTarget(packet, saddr, daddr, OspfL4Protocol::PROTOCOL_NUMBER, nullptr);
+}
+*/
+
+Ipv4EndPoint* OspfL4Protocol::Allocate(Ipv4Address address)
+{
+    NS_LOG_FUNCTION(this << address);
+    return m_endPoints->Allocate(address);
 }
 
 }

@@ -13,6 +13,7 @@ set(source_files
     helper/ipv6-routing-helper.cc
     helper/ipv6-static-routing-helper.cc
     helper/neighbor-cache-helper.cc
+    helper/ospf-helper.cc
     helper/rip-helper.cc
     helper/ripng-helper.cc
     model/arp-cache.cc
@@ -81,6 +82,7 @@ set(source_files
     model/ndisc-cache.cc
     model/ospf-header.cc
     model/ospf-l4-protocol.cc
+    model/ospf-routing.cc
     model/ospf-routing-table-entry.cc
     model/rip-header.cc
     model/rip.cc
@@ -146,6 +148,7 @@ set(header_files
     helper/ipv6-routing-helper.h
     helper/ipv6-static-routing-helper.h
     helper/neighbor-cache-helper.h
+    helper/ospf-helper.h
     helper/rip-helper.h
     helper/ripng-helper.h
     model/arp-cache.h
@@ -209,6 +212,7 @@ set(header_files
     model/ndisc-cache.h
     model/ospf-header.h
     model/ospf-l4-protocol.h
+    model/ospf-routing.h
     model/ospf-routing-table-entry.h
     model/rip-header.h
     model/rip.h
