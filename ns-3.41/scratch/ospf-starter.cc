@@ -22,6 +22,7 @@
 #include "ns3/internet-module.h"
 #include "ns3/ipv4-routing-table-entry.h"
 #include "ns3/ipv4-static-routing-helper.h"
+#include "ns3/ospf-header.h"
 
 #include <fstream>
 
@@ -35,6 +36,7 @@ int main(int argc, char** argv) {
     // the evolving routing tables.
     bool verbose = true;
     bool printRoutingTables = true;
+    bool showPings = false;
 
     if (verbose)
     {
@@ -63,6 +65,7 @@ int main(int argc, char** argv) {
     NodeContainer nc_src_r1(src, r1);
     NodeContainer nc_r1_r2(r1, r2);
     NodeContainer nc_r2_dst(r2, dst);
+    NodeContainer nc_src_dst(src, dst);
 
     NS_LOG_INFO("Create channels.");
     CsmaHelper csma_helper;
@@ -73,11 +76,69 @@ int main(int argc, char** argv) {
     NetDeviceContainer ndc_r2_dst = csma_helper.Install(nc_r2_dst);
 
     printf("Hello World");
+    OspfHelper ospfRouting;
 
+    Ipv4ListRoutingHelper listRH;
+    listRH.Add(ospfRouting, 0);
+
+    InternetStackHelper internet;
+    internet.SetIpv6StackInstall(false);
+    internet.SetRoutingHelper(listRH);
+    internet.Install(nc_r1_r2);
+
+    InternetStackHelper internetNodes;
+    internetNodes.SetIpv6StackInstall(false);
+    internetNodes.Install(nc_src_dst);
+
+    NS_LOG_INFO("Assign IPv4 Addresses.");
+    Ipv4AddressHelper ipv4;
+
+    ipv4.SetBase(Ipv4Address("10.0.0.0"), Ipv4Mask("255.255.255.0"));
+    Ipv4InterfaceContainer iic1 = ipv4.Assign(ndc_src_r1);
+
+    ipv4.SetBase(Ipv4Address("10.0.1.0"), Ipv4Mask("255.255.255.0"));
+    Ipv4InterfaceContainer iic2 = ipv4.Assign(ndc_r1_r2);
+
+    ipv4.SetBase(Ipv4Address("10.0.2.0"), Ipv4Mask("255.255.255.0"));
+    Ipv4InterfaceContainer iic3 = ipv4.Assign(ndc_r2_dst);
+
+    Ptr<Ipv4StaticRouting> staticRouting;
+    staticRouting = Ipv4RoutingHelper::GetRouting<Ipv4StaticRouting>(
+            src->GetObject<Ipv4>()->GetRoutingProtocol());
+    staticRouting->SetDefaultRoute("10.0.0.2", 1);
+    staticRouting = Ipv4RoutingHelper::GetRouting<Ipv4StaticRouting>(
+            dst->GetObject<Ipv4>()->GetRoutingProtocol());
+    staticRouting->SetDefaultRoute("10.0.2.1", 1);
 
     if(printRoutingTables) {
 
     }
+
+    NS_LOG_INFO("Create Applications.");
+    uint32_t packetSize = 1024;
+    Time interPacketInterval = Seconds(1.0);
+    PingHelper ping(Ipv4Address("10.0.2.2"));
+
+    ping.SetAttribute("Interval", TimeValue(interPacketInterval));
+    ping.SetAttribute("Size", UintegerValue(packetSize));
+    if (showPings)
+    {
+        ping.SetAttribute("VerboseMode", EnumValue(Ping::VerboseMode::VERBOSE));
+    }
+    ApplicationContainer apps = ping.Install(src);
+    apps.Start(Seconds(1.0));
+    apps.Stop(Seconds(110.0));
+
+    AsciiTraceHelper ascii;
+    csma_helper.EnableAsciiAll(ascii.CreateFileStream("ospf-starter.tr"));
+    csma_helper.EnablePcapAll("ospf-starter", true);
+
+    /* Now, do the actual simulation. */
+    NS_LOG_INFO("Run Simulation.");
+    Simulator::Stop(Seconds(131.0));
+    Simulator::Run();
+    Simulator::Destroy();
+    NS_LOG_INFO("Done.");
 
     return 0;
 }

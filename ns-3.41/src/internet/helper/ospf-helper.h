@@ -22,13 +22,13 @@ class OspfHelper : Ipv4RoutingHelper{
 
         void Set (std::string name, const AttributeValue& value);
 
-        int64_t AssignStreams(NodeContainer c, int64_t stream);
+        //int64_t AssignStreams(NodeContainer c, int64_t stream);
 
         void ExcludeInterface(Ptr<Node> node, uint32_t interface);
 
-        void SetInterfaceMetric(Ptr<Node> node, uint32_t interface, uint8_t metric);
+        //void SetInterfaceMetric(Ptr<Node> node, uint32_t interface, uint8_t metric);
 
-        void SetGatewayRouter(Ptr<Node> node, Ipv4Address nextHop, uint32_t interface);
+        //void SetGatewayRouter(Ptr<Node> node, Ipv4Address nextHop, uint32_t interface);
             //route to lead out of subnet
 
     private:

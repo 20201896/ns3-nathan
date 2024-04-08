@@ -24,6 +24,7 @@
 
 #include "ns3/packet.h"
 #include "ns3/ptr.h"
+#include "ns3/node.h"
 
 #include <stdint.h>
 #include <unordered_map>
@@ -49,6 +50,18 @@ class OspfL4Protocol : public IpL4Protocol {
 
     OspfL4Protocol();
     ~OspfL4Protocol() override;
+
+    enum States
+    {
+        DOWN = 0,
+        ATTEMPT = 1,
+        INIT = 2,
+        TWO_WAY = 3,
+        EXSTART = 4,
+        EXCHANGE = 5,
+        LOADING = 6,
+        FULL = 7
+    };
 
     // Delete copy constructor and assignment operator to avoid misuse
     OspfL4Protocol(const OspfL4Protocol&) = delete;
@@ -149,9 +162,42 @@ class OspfL4Protocol : public IpL4Protocol {
      * It is safe to call GetObject() from within this method.
      */
 
-    //void Send(Ptr<Packet> packet, Ipv4Address saddr, Ipv4Address daddr, uint16_t sport, uint16_t dport);
+    void Send(Ptr<Packet> packet, Ipv4Address saddr, Ipv4Address daddr);
+
+    void Send(Ptr<Packet> packet, Ipv4Address saddr, Ipv4Address daddr, Ptr<Ipv4Route> route);
+
+    void Send(Ptr<Packet> packet, Ipv6Address saddr, Ipv6Address daddr);
+
+    void Send(Ptr<Packet> packet, Ipv6Address saddr, Ipv6Address daddr, Ptr<Ipv6Route> route);
+
+    void ReceiveIcmp(Ipv4Address icmpSource,
+                     uint8_t icmpTtl,
+                     uint8_t icmpType,
+                     uint8_t icmpCode,
+                     uint32_t icmpInfo,
+                     Ipv4Address payloadSource,
+                     Ipv4Address payloadDestination,
+                     const uint8_t payload[8]) override;
+
+    void ReceiveIcmp(Ipv6Address icmpSource,
+                     uint8_t icmpTtl,
+                     uint8_t icmpType,
+                     uint8_t icmpCode,
+                     uint32_t icmpInfo,
+                     Ipv6Address payloadSource,
+                     Ipv6Address payloadDestination,
+                     const uint8_t payload[8]) override;
+
 
     Ipv4EndPoint* Allocate(Ipv4Address address);
+
+    void SetState(int);
+
+    void SetExclusions(std::set<uint32_t>);
+
+    void handleDownState();
+
+    void SetIpv4(Ptr<Ipv4>);
 
   protected:
 
@@ -170,6 +216,7 @@ class OspfL4Protocol : public IpL4Protocol {
      */
     void NotifyNewAggregate() override;
 
+    //void DoInitialize() override;
     /**
      * Initialize() implementation.
      *
@@ -183,6 +230,8 @@ class OspfL4Protocol : public IpL4Protocol {
      */
     void DoDispose() override;
 
+    void SendDownPacket();
+
   private:
     Ptr<Node> m_node;                    //!< The node this stack is associated with
     Ipv4EndPointDemux* m_endPoints;      //!< A list of IPv4 end points.
@@ -191,6 +240,11 @@ class OspfL4Protocol : public IpL4Protocol {
     IpL4Protocol::DownTargetCallback m_downTarget;   //!< Callback to send packets over IPv4
     IpL4Protocol::DownTargetCallback6 m_downTarget6; //!< Callback to send packets over IPv6
 
+    int m_state;
+    Ptr<Ipv4> m_ipv4;
+    std::set<uint32_t> m_interfaceExclusions;
+    //Time m_down_timer;
+    //Time m_next_down_timer;
 };
 
 }

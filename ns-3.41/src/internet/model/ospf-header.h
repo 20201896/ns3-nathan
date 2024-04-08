@@ -45,18 +45,17 @@ public:
     uint32_t GetSerializedSize() const override;
     void Serialize(Buffer::Iterator start) const override;
     uint32_t Deserialize(Buffer::Iterator start) override;
-    void EnableChecksums();
+    //void EnableChecksums();
     void InitializeChecksum(Ipv4Address source, Ipv4Address destination, uint8_t protocol);
-    void SetDestinationPort(uint16_t port);
-    void SetSourcePort(uint16_t port);
+    void SetState(int);
+    int GetState() const;
 
 private:
     bool m_calcChecksum;
     Address m_source;           //!< Source IP address
     Address m_destination;      //!< Destination IP address
     uint8_t m_protocol;        //!< Protocol number
-    uint16_t m_sourcePort{0xfffd};      //!< Source port
-    uint16_t m_destinationPort{0xfffd}; //!< Destination port
+    int m_state;
 };
 
 }
