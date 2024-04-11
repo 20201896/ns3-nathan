@@ -7,10 +7,29 @@ class OspfRouting : public Ipv4RoutingProtocol{
 public:
     OspfRouting();
     ~OspfRouting() override;
+    static TypeId GetTypeId();
     OspfRouting(const OspfRouting&) = delete;
     OspfRouting& operator=(const OspfRouting&) = delete;
     void SetIpv4(Ptr<Ipv4> ipv4) override;
     void SetInterfaceExclusions(std::set<uint32_t> exceptions);
+
+    Ptr<Ipv4Route> RouteOutput(Ptr<Packet> p,
+                               const Ipv4Header& header,
+                               Ptr<NetDevice> oif,
+                               Socket::SocketErrno& sockerr) override;
+    bool RouteInput(Ptr<const Packet> p,
+                    const Ipv4Header& header,
+                    Ptr<const NetDevice> idev,
+                    const UnicastForwardCallback& ucb,
+                    const MulticastForwardCallback& mcb,
+                    const LocalDeliverCallback& lcb,
+                    const ErrorCallback& ecb) override;
+    void NotifyInterfaceUp(uint32_t interface) override;
+    void NotifyInterfaceDown(uint32_t interface) override;
+    void NotifyAddAddress(uint32_t interface, Ipv4InterfaceAddress address) override;
+    void NotifyRemoveAddress(uint32_t interface, Ipv4InterfaceAddress address) override;
+    void PrintRoutingTable(Ptr<OutputStreamWrapper> stream,
+                           Time::Unit unit = Time::S) const override;
 
 protected:
     void DoInitialize() override;

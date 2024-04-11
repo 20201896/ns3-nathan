@@ -64,7 +64,7 @@ void OspfHeader::InitializeChecksum(Ipv4Address source, Ipv4Address destination,
 void OspfHeader::SetState(int new_state){
     m_state = new_state;
 }
-int OspfHeader::GetState() {
+int OspfHeader::GetState() const{
     return m_state;
 }
 

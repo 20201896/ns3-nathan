@@ -7,7 +7,7 @@
 namespace ns3
 {
 
-class OspfHelper : Ipv4RoutingHelper{
+class OspfHelper : public Ipv4RoutingHelper{
     public:
         OspfHelper();
         ~OspfHelper() override;

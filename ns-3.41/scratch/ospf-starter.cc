@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
     Ptr<Node> r1 = CreateObject<Node>();
     Names::Add("OspfRouter1", r1);
     Ptr<Node> r2 = CreateObject<Node>();
-    Names::Add("OspfRouter1", r2);
+    Names::Add("OspfRouter2", r2);
     Ptr<Node> dst = CreateObject<Node>();
     Names::Add("DstNode", dst);
 
@@ -76,10 +76,10 @@ int main(int argc, char** argv) {
     NetDeviceContainer ndc_r2_dst = csma_helper.Install(nc_r2_dst);
 
     printf("Hello World");
-    OspfHelper ospfRouting;
+    OspfHelper ospfHelper;
 
     Ipv4ListRoutingHelper listRH;
-    listRH.Add(ospfRouting, 0);
+    listRH.Add(ospfHelper, 0);
 
     InternetStackHelper internet;
     internet.SetIpv6StackInstall(false);
