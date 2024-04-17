@@ -18,7 +18,6 @@
 #include "ipv6-end-point.h"
 #include "ipv6-route.h"
 #include "ipv6.h"
-#include "udp-header.h"
 
 #include "ns3/assert.h"
 #include "ns3/boolean.h"
@@ -27,7 +26,7 @@
 #include "ns3/object-map.h"
 #include "ns3/packet.h"
 
-#include "ospf-header.h"
+#include "ospf-hello.h"
 
 #include <unordered_map>
 
@@ -45,7 +44,8 @@ const uint8_t OspfL4Protocol::PROTOCOL_NUMBER = 89;
 // Constructor
 OspfL4Protocol::OspfL4Protocol()
         : m_endPoints(new Ipv4EndPointDemux()),
-          m_endPoints6(new Ipv6EndPointDemux())
+          m_endPoints6(new Ipv6EndPointDemux()),
+          m_neighbor_table(OspfNeighborTable())
 {
     NS_LOG_FUNCTION(this);
 }
@@ -161,28 +161,26 @@ IpL4Protocol::DownTargetCallback6 OspfL4Protocol::GetDownTarget6() const {
     return m_downTarget6;
 }
 
-void OspfL4Protocol::Send(Ptr<Packet> packet, Ipv4Address saddr, Ipv4Address daddr)
+void OspfL4Protocol::Send(Ptr<Packet> packet, Ipv4Address saddr, Ipv4Address daddr, OspfHeader ospfHeader, int packetType, int currentState)
 {
     NS_LOG_FUNCTION(this << packet << saddr << daddr);
 
-    OspfHeader ospfHeader;
-
     ospfHeader.InitializeChecksum(saddr, daddr, OspfL4Protocol::PROTOCOL_NUMBER);
-    ospfHeader.SetState(m_state);
+    ospfHeader.SetState(currentState);
+    ospfHeader.SetPacketType(packetType);
 
     packet->AddHeader(ospfHeader);
 
     m_downTarget(packet, saddr, daddr, OspfL4Protocol::PROTOCOL_NUMBER, nullptr);
 }
 
-void OspfL4Protocol::Send(Ptr<Packet> packet, Ipv4Address saddr, Ipv4Address daddr, Ptr<Ipv4Route> route)
+void OspfL4Protocol::Send(Ptr<Packet> packet, Ipv4Address saddr, Ipv4Address daddr, OspfHeader ospfHeader, int packetType, int currentState, Ptr<Ipv4Route> route)
 {
     NS_LOG_FUNCTION(this << packet << saddr << daddr << route);
 
-    OspfHeader ospfHeader;
-
     ospfHeader.InitializeChecksum(saddr, daddr, OspfL4Protocol::PROTOCOL_NUMBER);
-    ospfHeader.SetState(m_state);
+    ospfHeader.SetState(currentState);
+    ospfHeader.SetPacketType(packetType);
 
     packet->AddHeader(ospfHeader);
 
@@ -224,6 +222,12 @@ OspfL4Protocol::Receive(Ptr<Packet> packet, const Ipv4Header& header, Ptr<Ipv4In
     OspfHeader ospfHeader;
 
     ospfHeader.InitializeChecksum(header.GetSource(), header.GetDestination(), OspfL4Protocol::PROTOCOL_NUMBER);
+
+    packet->PeekHeader(ospfHeader);
+
+    if (ospfHeader.GetState() == States::DOWN){
+
+    }
 
     return IpL4Protocol::RX_OK;
 }
@@ -303,13 +307,32 @@ OspfL4Protocol::ReceiveIcmp(Ipv6Address icmpSource,
     }
 }
 
-void OspfL4Protocol::handleDownState()
+void OspfL4Protocol::startDownState()
 {
-    //create timer
-    //create timer ten seconds from now
-    //send down packet
-    if (m_state == States::DOWN){
-        SendDownPacket();
+    OspfNeighborTable::neighborList neighbor_table = m_neighbor_table.getCurrentNeighbors();
+    for (uint32_t i = 0; i < m_ipv4->GetNInterfaces(); i++)
+    {
+        Ptr<LoopbackNetDevice> check = DynamicCast<LoopbackNetDevice>(m_ipv4->GetNetDevice(i));
+        if (check) {
+            continue;
+        }
+        for (uint32_t j = 0; j < m_ipv4->GetNAddresses(i); j++)
+        {
+            bool isInterfaceFull = false;
+            Ipv4InterfaceAddress address = m_ipv4->GetAddress(i, j);
+            if (!neighbor_table.empty()){
+                for (const auto& row : neighbor_table){
+                    for (const auto& tableItems : row){
+                        if (address == tableItems.ipInterface->GetAddress(i)){
+                            isInterfaceFull = true;
+                        }
+                    }
+                }
+            }
+            if (!isInterfaceFull){
+                SendDownPacket(address);
+            }
+        }
     }
 }
 
@@ -323,32 +346,17 @@ void OspfL4Protocol::SetExclusions(std::set<uint32_t> iExclusions)
     m_interfaceExclusions = iExclusions;
 }
 
-void OspfL4Protocol::SendDownPacket()
+void OspfL4Protocol::SendDownPacket(Ipv4InterfaceAddress address)
 {
-    //it should take in a timer object so it can callback itself
     Ptr<Packet> p = Create<Packet>();
-
-    for (uint32_t i = 0; i < m_ipv4->GetNInterfaces(); i++)
+    OspfHello helloHeader;
+    helloHeader.setNeighbors(m_neighbor_table.getCurrentNeighbors());
+    if (address.GetScope() != Ipv4InterfaceAddress::HOST)
     {
-        Ptr<LoopbackNetDevice> check = DynamicCast<LoopbackNetDevice>(m_ipv4->GetNetDevice(i));
-        if (check) {
-            continue;
-        }
-        for (uint32_t j = 0; j < m_ipv4->GetNAddresses(i); j++)
-        {
-            Ipv4InterfaceAddress address = m_ipv4->GetAddress(i, j);
-            if (address.GetScope() != Ipv4InterfaceAddress::HOST)
-            {
-                Send(p, address.GetLocal(), OSPF_ALL_NODE);
-            }
-        }
+        Send(p, address.GetLocal(), OSPF_ALL_NODE, helloHeader, PacketType::HELLO, States::DOWN);
     }
 }
 
-void OspfL4Protocol::SetState(int new_state)
-{
-    m_state = new_state;
-}
 
 Ipv4EndPoint* OspfL4Protocol::Allocate(Ipv4Address address)
 {

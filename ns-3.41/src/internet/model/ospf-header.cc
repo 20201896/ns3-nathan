@@ -67,5 +67,11 @@ void OspfHeader::SetState(int new_state){
 int OspfHeader::GetState() const{
     return m_state;
 }
+void OspfHeader::SetPacketType(int new_packet_type){
+    m_packet_type = new_packet_type;
+}
+int OspfHeader::GetPacketType() const{
+    return m_packet_type;
+}
 
 }

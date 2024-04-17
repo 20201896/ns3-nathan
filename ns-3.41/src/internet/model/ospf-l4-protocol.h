@@ -25,6 +25,8 @@
 #include "ns3/packet.h"
 #include "ns3/ptr.h"
 #include "ns3/node.h"
+#include "ospf-neighbor-table.h"
+#include "ospf-header.h"
 
 #include <stdint.h>
 #include <unordered_map>
@@ -61,6 +63,15 @@ class OspfL4Protocol : public IpL4Protocol {
         EXCHANGE = 5,
         LOADING = 6,
         FULL = 7
+    };
+
+    enum PacketType
+    {
+        HELLO = 0,
+        DBD = 1,
+        LSA = 2,
+        LSU = 3,
+        LSAck = 4
     };
 
     // Delete copy constructor and assignment operator to avoid misuse
@@ -162,9 +173,9 @@ class OspfL4Protocol : public IpL4Protocol {
      * It is safe to call GetObject() from within this method.
      */
 
-    void Send(Ptr<Packet> packet, Ipv4Address saddr, Ipv4Address daddr);
+    void Send(Ptr<Packet> packet, Ipv4Address saddr, Ipv4Address daddr, OspfHeader ospfHeader, int packetType, int currentState);
 
-    void Send(Ptr<Packet> packet, Ipv4Address saddr, Ipv4Address daddr, Ptr<Ipv4Route> route);
+    void Send(Ptr<Packet> packet, Ipv4Address saddr, Ipv4Address daddr, OspfHeader ospfHeader, int packetType, int currentState, Ptr<Ipv4Route> route);
 
     void Send(Ptr<Packet> packet, Ipv6Address saddr, Ipv6Address daddr);
 
@@ -191,11 +202,9 @@ class OspfL4Protocol : public IpL4Protocol {
 
     Ipv4EndPoint* Allocate(Ipv4Address address);
 
-    void SetState(int);
-
     void SetExclusions(std::set<uint32_t>);
 
-    void handleDownState();
+    void startDownState();
 
     void SetIpv4(Ptr<Ipv4>);
 
@@ -230,7 +239,7 @@ class OspfL4Protocol : public IpL4Protocol {
      */
     void DoDispose() override;
 
-    void SendDownPacket();
+    void SendDownPacket(Ipv4InterfaceAddress);
 
   private:
     Ptr<Node> m_node;                    //!< The node this stack is associated with
@@ -240,9 +249,9 @@ class OspfL4Protocol : public IpL4Protocol {
     IpL4Protocol::DownTargetCallback m_downTarget;   //!< Callback to send packets over IPv4
     IpL4Protocol::DownTargetCallback6 m_downTarget6; //!< Callback to send packets over IPv6
 
-    int m_state;
     Ptr<Ipv4> m_ipv4;
     std::set<uint32_t> m_interfaceExclusions;
+    OspfNeighborTable m_neighbor_table;
     //Time m_down_timer;
     //Time m_next_down_timer;
 };

@@ -78,13 +78,12 @@ void OspfRouting::DoInitialize() {
                 dest_add = Ipv4Address(OSPF_ALL_NODE);
                 //TODO find out how rip get empheral ports allocated and figure out how it listens on protocol ports
                 //m_ospf_protocol->Send(p, address.GetLocal(), dest_add);
-                m_ospf_protocol->Allocate(address.GetLocal());
+                //m_ospf_protocol->Allocate(address.GetLocal());
             }
         }
     }
-    m_ospf_protocol->SetState(0);
     m_ospf_protocol->SetIpv4(m_ipv4);
-    m_ospf_protocol->handleDownState();
+    m_ospf_protocol->startDownState();
 
     Ipv4RoutingProtocol::DoInitialize();
 }

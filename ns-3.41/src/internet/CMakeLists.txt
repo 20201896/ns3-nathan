@@ -81,7 +81,9 @@ set(source_files
     model/loopback-net-device.cc
     model/ndisc-cache.cc
     model/ospf-header.cc
+    model/ospf-hello.cc
     model/ospf-l4-protocol.cc
+    model/ospf-neighbor-table.cc
     model/ospf-routing.cc
     model/ospf-routing-table-entry.cc
     model/rip-header.cc
@@ -211,7 +213,9 @@ set(header_files
     model/loopback-net-device.h
     model/ndisc-cache.h
     model/ospf-header.h
+    model/ospf-hello.h
     model/ospf-l4-protocol.h
+    model/ospf-neighbor-table.h
     model/ospf-routing.h
     model/ospf-routing-table-entry.h
     model/rip-header.h

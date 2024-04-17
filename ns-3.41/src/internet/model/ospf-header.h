@@ -49,6 +49,8 @@ public:
     void InitializeChecksum(Ipv4Address source, Ipv4Address destination, uint8_t protocol);
     void SetState(int);
     int GetState() const;
+    void SetPacketType(int);
+    int GetPacketType() const;
 
 private:
     bool m_calcChecksum;
@@ -56,6 +58,7 @@ private:
     Address m_destination;      //!< Destination IP address
     uint8_t m_protocol;        //!< Protocol number
     int m_state;
+    int m_packet_type;
 };
 
 }
