@@ -73,5 +73,11 @@ void OspfHeader::SetPacketType(int new_packet_type){
 int OspfHeader::GetPacketType() const{
     return m_packet_type;
 }
+void OspfHeader::SetMask(Ipv4Mask ipv4Mask) {
+    m_mask = ipv4Mask;
+}
+Ipv4Mask OspfHeader::GetMask() {
+    return m_mask;
+}
 
 }

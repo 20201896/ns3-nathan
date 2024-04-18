@@ -51,12 +51,15 @@ public:
     int GetState() const;
     void SetPacketType(int);
     int GetPacketType() const;
+    void SetMask(Ipv4Mask);
+    Ipv4Mask GetMask();
 
 private:
     bool m_calcChecksum;
     Address m_source;           //!< Source IP address
     Address m_destination;      //!< Destination IP address
     uint8_t m_protocol;        //!< Protocol number
+    Ipv4Mask m_mask;
     int m_state;
     int m_packet_type;
 };

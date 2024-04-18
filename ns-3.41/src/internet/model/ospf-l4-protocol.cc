@@ -26,7 +26,7 @@
 #include "ns3/object-map.h"
 #include "ns3/packet.h"
 
-#include "ospf-hello.h"
+#include "ipv4-packet-info-tag.h"
 
 #include <unordered_map>
 
@@ -161,26 +161,28 @@ IpL4Protocol::DownTargetCallback6 OspfL4Protocol::GetDownTarget6() const {
     return m_downTarget6;
 }
 
-void OspfL4Protocol::Send(Ptr<Packet> packet, Ipv4Address saddr, Ipv4Address daddr, OspfHeader ospfHeader, int packetType, int currentState)
+void OspfL4Protocol::Send(Ptr<Packet> packet, Ipv4Address saddr, Ipv4Address daddr, Ipv4Mask ipv4Mask, OspfHeader ospfHeader, int packetType, int currentState)
 {
     NS_LOG_FUNCTION(this << packet << saddr << daddr);
 
     ospfHeader.InitializeChecksum(saddr, daddr, OspfL4Protocol::PROTOCOL_NUMBER);
     ospfHeader.SetState(currentState);
     ospfHeader.SetPacketType(packetType);
+    ospfHeader.SetMask(ipv4Mask);
 
     packet->AddHeader(ospfHeader);
 
     m_downTarget(packet, saddr, daddr, OspfL4Protocol::PROTOCOL_NUMBER, nullptr);
 }
 
-void OspfL4Protocol::Send(Ptr<Packet> packet, Ipv4Address saddr, Ipv4Address daddr, OspfHeader ospfHeader, int packetType, int currentState, Ptr<Ipv4Route> route)
+void OspfL4Protocol::Send(Ptr<Packet> packet, Ipv4Address saddr, Ipv4Address daddr, Ipv4Mask ipv4Mask, OspfHeader ospfHeader, int packetType, int currentState, Ptr<Ipv4Route> route)
 {
     NS_LOG_FUNCTION(this << packet << saddr << daddr << route);
 
     ospfHeader.InitializeChecksum(saddr, daddr, OspfL4Protocol::PROTOCOL_NUMBER);
     ospfHeader.SetState(currentState);
     ospfHeader.SetPacketType(packetType);
+    ospfHeader.SetMask(ipv4Mask);
 
     packet->AddHeader(ospfHeader);
 
@@ -225,8 +227,15 @@ OspfL4Protocol::Receive(Ptr<Packet> packet, const Ipv4Header& header, Ptr<Ipv4In
 
     packet->PeekHeader(ospfHeader);
 
-    if (ospfHeader.GetState() == States::DOWN){
+    Ipv4PacketInfoTag interfaceInfo;
+    if (!packet->RemovePacketTag(interfaceInfo))
+    {
+        NS_ABORT_MSG("No incoming interface on RIP message, aborting.");
+    }
+    uint32_t incomingIf = interfaceInfo.GetRecvIf();
 
+    if (ospfHeader.GetState() == States::DOWN){
+        HandleDownResponse(header, ospfHeader, interface, incomingIf);
     }
 
     return IpL4Protocol::RX_OK;
@@ -316,21 +325,31 @@ void OspfL4Protocol::startDownState()
         if (check) {
             continue;
         }
+
+        bool activeInterface = false;
+        if (m_interfaceExclusions.find(i) == m_interfaceExclusions.end())
+        {
+            activeInterface = true;
+            m_ipv4->SetForwarding(i, true);
+        }
+
         for (uint32_t j = 0; j < m_ipv4->GetNAddresses(i); j++)
         {
             bool isInterfaceFull = false;
             Ipv4InterfaceAddress address = m_ipv4->GetAddress(i, j);
-            if (!neighbor_table.empty()){
-                for (const auto& row : neighbor_table){
-                    for (const auto& tableItems : row){
-                        if (address == tableItems.ipInterface->GetAddress(i)){
-                            isInterfaceFull = true;
+            if (address.GetScope() != Ipv4InterfaceAddress::HOST && activeInterface) {
+                if (!neighbor_table.empty()) {
+                    for (const auto &row: neighbor_table) {
+                        for (const auto &tableItems: row) {
+                            if (address == tableItems.ipInterface->GetAddress(i)) {
+                                isInterfaceFull = true;
+                            }
                         }
                     }
                 }
-            }
-            if (!isInterfaceFull){
-                SendDownPacket(address);
+                if (!isInterfaceFull) {
+                    SendDownPacket(address);
+                }
             }
         }
     }
@@ -353,7 +372,40 @@ void OspfL4Protocol::SendDownPacket(Ipv4InterfaceAddress address)
     helloHeader.setNeighbors(m_neighbor_table.getCurrentNeighbors());
     if (address.GetScope() != Ipv4InterfaceAddress::HOST)
     {
-        Send(p, address.GetLocal(), OSPF_ALL_NODE, helloHeader, PacketType::HELLO, States::DOWN);
+        Send(p, address.GetLocal(), OSPF_ALL_NODE, address.GetMask(), helloHeader, PacketType::HELLO, States::DOWN);
+    }
+}
+
+
+void OspfL4Protocol::HandleDownResponse(Ipv4Header header, OspfHeader ospfHeader, Ptr<Ipv4Interface> interface, uint32_t incomingIf){
+    //TODO manage when down is received but no down is sent i.e. straight to 2-Way
+    m_neighbor_table.addNeighbors(header.GetSource(), ospfHeader.GetMask(), interface, ospfHeader.GetState());
+    SendInitPacket(interface->GetAddress(incomingIf), header.GetSource());
+}
+
+void OspfL4Protocol::SendInitPacket(Ipv4InterfaceAddress address, Ipv4Address daddr){
+    Ptr<Packet> p = Create<Packet>();
+    OspfHello helloHeader;
+    helloHeader.setNeighbors(m_neighbor_table.getCurrentNeighbors());
+    if (address.GetScope() != Ipv4InterfaceAddress::HOST)
+    {
+        Send(p, address.GetLocal(), daddr, address.GetMask(), helloHeader, PacketType::HELLO, States::INIT);
+    }
+}
+
+void OspfL4Protocol::HandleInitResponse(Ipv4Header header, OspfHeader ospfHeader, Ptr<Ipv4Interface> interface, uint32_t incomingIf){
+    //TODO loop through ospfheader table if our IP address exists, if so move to 2-Way state
+    m_neighbor_table.addNeighbors(header.GetSource(), ospfHeader.GetMask(), interface, ospfHeader.GetState());
+    SendTwoWayPacket(interface->GetAddress(incomingIf), header.GetSource());
+}
+
+void OspfL4Protocol::SendTwoWayPacket(Ipv4InterfaceAddress address, Ipv4Address daddr){
+    Ptr<Packet> p = Create<Packet>();
+    OspfHello helloHeader;
+    helloHeader.setNeighbors(m_neighbor_table.getCurrentNeighbors());
+    if (address.GetScope() != Ipv4InterfaceAddress::HOST)
+    {
+        Send(p, address.GetLocal(), daddr, address.GetMask(), helloHeader, PacketType::HELLO, States::TWO_WAY);
     }
 }
 

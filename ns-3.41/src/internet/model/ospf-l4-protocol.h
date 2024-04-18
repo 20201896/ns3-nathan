@@ -27,6 +27,7 @@
 #include "ns3/node.h"
 #include "ospf-neighbor-table.h"
 #include "ospf-header.h"
+#include "ospf-hello.h"
 
 #include <stdint.h>
 #include <unordered_map>
@@ -173,9 +174,9 @@ class OspfL4Protocol : public IpL4Protocol {
      * It is safe to call GetObject() from within this method.
      */
 
-    void Send(Ptr<Packet> packet, Ipv4Address saddr, Ipv4Address daddr, OspfHeader ospfHeader, int packetType, int currentState);
+    void Send(Ptr<Packet> packet, Ipv4Address saddr, Ipv4Address daddr, Ipv4Mask ipv4Mask, OspfHeader ospfHeader, int packetType, int currentState);
 
-    void Send(Ptr<Packet> packet, Ipv4Address saddr, Ipv4Address daddr, OspfHeader ospfHeader, int packetType, int currentState, Ptr<Ipv4Route> route);
+    void Send(Ptr<Packet> packet, Ipv4Address saddr, Ipv4Address daddr, Ipv4Mask ipv4Mask, OspfHeader ospfHeader, int packetType, int currentState, Ptr<Ipv4Route> route);
 
     void Send(Ptr<Packet> packet, Ipv6Address saddr, Ipv6Address daddr);
 
@@ -240,6 +241,14 @@ class OspfL4Protocol : public IpL4Protocol {
     void DoDispose() override;
 
     void SendDownPacket(Ipv4InterfaceAddress);
+
+    void SendInitPacket(Ipv4InterfaceAddress, Ipv4Address);
+
+    void SendTwoWayPacket(Ipv4InterfaceAddress, Ipv4Address);
+
+    void HandleDownResponse(Ipv4Header, OspfHeader, Ptr<Ipv4Interface>, uint32_t);
+
+    void HandleInitResponse(Ipv4Header, OspfHeader, Ptr<Ipv4Interface>, uint32_t);
 
   private:
     Ptr<Node> m_node;                    //!< The node this stack is associated with
