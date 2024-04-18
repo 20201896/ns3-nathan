@@ -248,7 +248,7 @@ class OspfL4Protocol : public IpL4Protocol {
 
     void HandleDownResponse(Ipv4Header, OspfHeader, Ptr<Ipv4Interface>, uint32_t);
 
-    void HandleInitResponse(Ipv4Header, OspfHeader, Ptr<Ipv4Interface>, uint32_t);
+    void HandleInitResponse(Ptr<Packet>, Ipv4Header, OspfHeader, Ptr<Ipv4Interface>, uint32_t);
 
   private:
     Ptr<Node> m_node;                    //!< The node this stack is associated with

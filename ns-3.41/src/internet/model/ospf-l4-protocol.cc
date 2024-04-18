@@ -237,6 +237,9 @@ OspfL4Protocol::Receive(Ptr<Packet> packet, const Ipv4Header& header, Ptr<Ipv4In
     if (ospfHeader.GetState() == States::DOWN){
         HandleDownResponse(header, ospfHeader, interface, incomingIf);
     }
+    if (ospfHeader.GetState() == States::INIT){
+        HandleInitResponse(packet, header, ospfHeader, interface, incomingIf);
+    }
 
     return IpL4Protocol::RX_OK;
 }
@@ -393,10 +396,29 @@ void OspfL4Protocol::SendInitPacket(Ipv4InterfaceAddress address, Ipv4Address da
     }
 }
 
-void OspfL4Protocol::HandleInitResponse(Ipv4Header header, OspfHeader ospfHeader, Ptr<Ipv4Interface> interface, uint32_t incomingIf){
+void OspfL4Protocol::HandleInitResponse(Ptr<Packet> packet, Ipv4Header header, OspfHeader ospfHeader, Ptr<Ipv4Interface> interface, uint32_t incomingIf){
     //TODO loop through ospfheader table if our IP address exists, if so move to 2-Way state
-    m_neighbor_table.addNeighbors(header.GetSource(), ospfHeader.GetMask(), interface, ospfHeader.GetState());
-    SendTwoWayPacket(interface->GetAddress(incomingIf), header.GetSource());
+    OspfHello helloHeader;
+    packet->PeekHeader(helloHeader);
+    OspfNeighborTable::neighborList neighbors = helloHeader.getNeighbors();
+    if (neighbors.empty()){
+        SendDownPacket(interface->GetAddress(incomingIf));
+    }else{
+        bool check = false;
+        for (const auto& row : neighbors){
+            for (const auto& neighborItems : row){
+                if (neighborItems.ipAdd == interface->GetAddress(incomingIf).GetLocal()){
+                    check = true;
+                }
+            }
+        }
+        if (check){
+            m_neighbor_table.addNeighbors(header.GetSource(), ospfHeader.GetMask(), interface, ospfHeader.GetState());
+            SendTwoWayPacket(interface->GetAddress(incomingIf), header.GetSource());
+        }else{
+            SendDownPacket(interface->GetAddress(incomingIf));
+        }
+    }
 }
 
 void OspfL4Protocol::SendTwoWayPacket(Ipv4InterfaceAddress address, Ipv4Address daddr){
