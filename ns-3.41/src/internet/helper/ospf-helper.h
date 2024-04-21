@@ -26,6 +26,8 @@ class OspfHelper : public Ipv4RoutingHelper{
 
         void ExcludeInterface(Ptr<Node> node, uint32_t interface);
 
+        void AssignAreaNumber(Ptr<Node>, int);
+
         //void SetInterfaceMetric(Ptr<Node> node, uint32_t interface, uint8_t metric);
 
         //void SetGatewayRouter(Ptr<Node> node, Ipv4Address nextHop, uint32_t interface);

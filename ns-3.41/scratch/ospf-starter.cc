@@ -78,6 +78,9 @@ int main(int argc, char** argv) {
     printf("Hello World");
     OspfHelper ospfHelper;
 
+    ospfHelper.AssignAreaNumber(r1, 0);
+    ospfHelper.AssignAreaNumber(r2, 0);
+
     Ipv4ListRoutingHelper listRH;
     listRH.Add(ospfHelper, 0);
 

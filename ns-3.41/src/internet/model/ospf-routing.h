@@ -30,6 +30,7 @@ public:
     void NotifyRemoveAddress(uint32_t interface, Ipv4InterfaceAddress address) override;
     void PrintRoutingTable(Ptr<OutputStreamWrapper> stream,
                            Time::Unit unit = Time::S) const override;
+    void SetArea(int);
 
 protected:
     void DoInitialize() override;

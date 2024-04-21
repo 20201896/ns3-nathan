@@ -93,5 +93,8 @@ void OspfRouting::SetIpv4(Ptr<Ipv4> ipv4){
 void SendDownUpdate(){
 
 }
+void OspfRouting::SetArea(int a_id) {
+    m_ospf_protocol->SetOspfAreaType(a_id);
+}
 
 }

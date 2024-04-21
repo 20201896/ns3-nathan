@@ -6,6 +6,8 @@
 #include "ns3/node.h"
 #include "ns3/ospf-l4-protocol.h"
 #include "ns3/ptr.h"
+#include "ns3/ipv4-global-routing.h"
+#include "ns3/global-router-interface.h"
 
 namespace ns3
 {
@@ -63,6 +65,13 @@ void OspfHelper::ExcludeInterface(Ptr<Node> node, uint32_t interface)
     }else{
         it->second.insert(interface);
     }
+}
+
+void OspfHelper::AssignAreaNumber(Ptr<Node> node, int a_id){
+    Ptr<Ipv4> ipv4 = node->GetObject<Ipv4>();
+    Ptr<Ipv4RoutingProtocol> proto = ipv4->GetRoutingProtocol();
+    Ptr<OspfRouting> ospfRouting = DynamicCast<OspfRouting>(proto);
+    ospfRouting->SetArea(a_id);
 }
 
 /*

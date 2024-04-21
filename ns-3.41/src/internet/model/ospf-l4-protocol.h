@@ -87,6 +87,8 @@ class OspfL4Protocol : public IpL4Protocol {
 
     int GetProtocolNumber() const override;
 
+    void SetOspfAreaType(int);
+
     /**************************************************************************
      *
      * MRG: Inherited from IpL4Protocol
@@ -246,7 +248,7 @@ class OspfL4Protocol : public IpL4Protocol {
 
     void SendTwoWayPacket(Ipv4InterfaceAddress, Ipv4Address);
 
-    void HandleDownResponse(Ipv4Header, OspfHeader, Ptr<Ipv4Interface>, uint32_t);
+    void HandleDownResponse(Ptr<Packet>, Ipv4Header, OspfHeader, Ptr<Ipv4Interface>, uint32_t);
 
     void HandleInitResponse(Ptr<Packet>, Ipv4Header, OspfHeader, Ptr<Ipv4Interface>, uint32_t);
 
@@ -261,6 +263,8 @@ class OspfL4Protocol : public IpL4Protocol {
     Ptr<Ipv4> m_ipv4;
     std::set<uint32_t> m_interfaceExclusions;
     OspfNeighborTable m_neighbor_table;
+    uint32_t m_routerId;
+    int m_areaId;
     //Time m_down_timer;
     //Time m_next_down_timer;
 };

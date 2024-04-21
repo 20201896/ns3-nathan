@@ -48,6 +48,8 @@ OspfL4Protocol::OspfL4Protocol()
           m_neighbor_table(OspfNeighborTable())
 {
     NS_LOG_FUNCTION(this);
+    Ptr<Node> node = this->GetObject<Node>();
+    m_routerId = node->GetId();
 }
 
 // Destructor
@@ -235,7 +237,7 @@ OspfL4Protocol::Receive(Ptr<Packet> packet, const Ipv4Header& header, Ptr<Ipv4In
     uint32_t incomingIf = interfaceInfo.GetRecvIf();
 
     if (ospfHeader.GetState() == States::DOWN){
-        HandleDownResponse(header, ospfHeader, interface, incomingIf);
+        HandleDownResponse(packet, header, ospfHeader, interface, incomingIf);
     }
     if (ospfHeader.GetState() == States::INIT){
         HandleInitResponse(packet, header, ospfHeader, interface, incomingIf);
@@ -373,6 +375,8 @@ void OspfL4Protocol::SendDownPacket(Ipv4InterfaceAddress address)
     Ptr<Packet> p = Create<Packet>();
     OspfHello helloHeader;
     helloHeader.setNeighbors(m_neighbor_table.getCurrentNeighbors());
+    helloHeader.setRouterId(m_routerId);
+    helloHeader.setAreaId(m_areaId);
     if (address.GetScope() != Ipv4InterfaceAddress::HOST)
     {
         Send(p, address.GetLocal(), OSPF_ALL_NODE, address.GetMask(), helloHeader, PacketType::HELLO, States::DOWN);
@@ -380,16 +384,23 @@ void OspfL4Protocol::SendDownPacket(Ipv4InterfaceAddress address)
 }
 
 
-void OspfL4Protocol::HandleDownResponse(Ipv4Header header, OspfHeader ospfHeader, Ptr<Ipv4Interface> interface, uint32_t incomingIf){
+void OspfL4Protocol::HandleDownResponse(Ptr<Packet> packet, Ipv4Header header, OspfHeader ospfHeader, Ptr<Ipv4Interface> interface, uint32_t incomingIf){
     //TODO manage when down is received but no down is sent i.e. straight to 2-Way
-    m_neighbor_table.addNeighbors(header.GetSource(), ospfHeader.GetMask(), interface, ospfHeader.GetState());
-    SendInitPacket(interface->GetAddress(incomingIf), header.GetSource());
+    OspfHello helloHeader;
+    packet->PeekHeader(helloHeader);
+    if (helloHeader.getAreaId() == m_areaId) {
+        m_neighbor_table.addNeighbors(header.GetSource(), ospfHeader.GetMask(), interface, ospfHeader.GetState(),
+                                      helloHeader.getRouterId());
+        SendInitPacket(interface->GetAddress(incomingIf), header.GetSource());
+    }
 }
 
 void OspfL4Protocol::SendInitPacket(Ipv4InterfaceAddress address, Ipv4Address daddr){
     Ptr<Packet> p = Create<Packet>();
     OspfHello helloHeader;
     helloHeader.setNeighbors(m_neighbor_table.getCurrentNeighbors());
+    helloHeader.setRouterId(m_routerId);
+    helloHeader.setAreaId(m_areaId);
     if (address.GetScope() != Ipv4InterfaceAddress::HOST)
     {
         Send(p, address.GetLocal(), daddr, address.GetMask(), helloHeader, PacketType::HELLO, States::INIT);
@@ -407,14 +418,42 @@ void OspfL4Protocol::HandleInitResponse(Ptr<Packet> packet, Ipv4Header header, O
         bool check = false;
         for (const auto& row : neighbors){
             for (const auto& neighborItems : row){
-                if (neighborItems.ipAdd == interface->GetAddress(incomingIf).GetLocal()){
+                if (neighborItems.router_id == m_routerId){
                     check = true;
                 }
             }
         }
+        if (helloHeader.getAreaId() != m_areaId){
+            check = false;
+        }
         if (check){
-            m_neighbor_table.addNeighbors(header.GetSource(), ospfHeader.GetMask(), interface, ospfHeader.GetState());
-            SendTwoWayPacket(interface->GetAddress(incomingIf), header.GetSource());
+            bool add_neighbor = false;
+            OspfNeighborTable::neighborList m_current_neighbors = m_neighbor_table.getCurrentNeighbors();
+            if (m_current_neighbors.empty()){
+                add_neighbor = true;
+            }else{
+                bool iterator_check = false;
+                for (const auto& row : m_current_neighbors){
+                    for (const auto& neighborItems : row){
+                        if (neighborItems.router_id == helloHeader.getRouterId()){
+                            iterator_check = true;
+                        }
+                    }
+                }
+                if (iterator_check){
+                    add_neighbor = false;
+                }else{
+                    add_neighbor = true;
+                }
+            }
+            if (add_neighbor) {
+                m_neighbor_table.addNeighbors(header.GetSource(), ospfHeader.GetMask(), interface,
+                                              ospfHeader.GetState(), helloHeader.getRouterId());
+                SendTwoWayPacket(interface->GetAddress(incomingIf), header.GetSource());
+            }else{
+                m_neighbor_table.set_State(States::INIT, m_routerId);
+                SendTwoWayPacket(interface->GetAddress(incomingIf), header.GetSource());
+            }
         }else{
             SendDownPacket(interface->GetAddress(incomingIf));
         }
@@ -425,12 +464,19 @@ void OspfL4Protocol::SendTwoWayPacket(Ipv4InterfaceAddress address, Ipv4Address 
     Ptr<Packet> p = Create<Packet>();
     OspfHello helloHeader;
     helloHeader.setNeighbors(m_neighbor_table.getCurrentNeighbors());
+    helloHeader.setRouterId(m_routerId);
+    helloHeader.setAreaId(m_areaId);
     if (address.GetScope() != Ipv4InterfaceAddress::HOST)
     {
         Send(p, address.GetLocal(), daddr, address.GetMask(), helloHeader, PacketType::HELLO, States::TWO_WAY);
     }
 }
 
+
+
+void OspfL4Protocol::SetOspfAreaType(int area_id){
+    m_areaId = area_id;
+}
 
 Ipv4EndPoint* OspfL4Protocol::Allocate(Ipv4Address address)
 {

@@ -12,9 +12,14 @@ public:
     ~OspfHello();
     void setNeighbors(OspfNeighborTable::neighborList);
     OspfNeighborTable::neighborList getNeighbors();
+    void setRouterId(uint32_t);
+    uint32_t getRouterId();
+    void setAreaId(int);
+    int getAreaId();
 private:
     OspfNeighborTable::neighborList m_neighbors;
-
+    uint32_t router_id;
+    int area_id;
 };
 
 }
