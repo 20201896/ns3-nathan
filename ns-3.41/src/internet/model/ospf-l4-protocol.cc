@@ -388,7 +388,7 @@ void OspfL4Protocol::HandleDownResponse(Ptr<Packet> packet, Ipv4Header header, O
     //TODO manage when down is received but no down is sent i.e. straight to 2-Way
     OspfHello helloHeader;
     packet->PeekHeader(helloHeader);
-    if (helloHeader.getAreaId() == m_areaId) {
+    if (helloHeader.getAreaId() == m_areaId and ospfHeader.GetMask() == interface->GetAddress(incomingIf).GetMask()) {
         m_neighbor_table.addNeighbors(header.GetSource(), ospfHeader.GetMask(), interface, ospfHeader.GetState(),
                                       helloHeader.getRouterId());
         SendInitPacket(interface->GetAddress(incomingIf), header.GetSource());
