@@ -355,7 +355,7 @@ void InternetStackHelper::Install(Ptr<Node> node) const {
         // MRG: Here I think will plug us into the L3 functionality
         // Potentially, we can work this way (without a socket because we are not
         // passing data back up to an application above us )
-        CreateAndAggregateObjectFromTypeId(node, "ns3::OspfL4Protocol");
+        //CreateAndAggregateObjectFromTypeId(node, "ns3::OspfL4Protocol");
         if (!node->GetObject<PacketSocketFactory>())
         {
             Ptr<PacketSocketFactory> factory = CreateObject<PacketSocketFactory>();

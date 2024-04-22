@@ -74,6 +74,24 @@ void OspfHelper::AssignAreaNumber(Ptr<Node> node, int a_id){
     ospfRouting->SetArea(a_id);
 }
 
+void OspfHelper::CreateAndAggregateObjectFromTypeId(Ptr<Node> node, const std::string typeId)
+{
+    TypeId tid = TypeId::LookupByName(typeId);
+    if (node->GetObject<Object>(tid))
+    {
+        return;
+    }
+
+    ObjectFactory factory;
+    factory.SetTypeId(typeId);
+    Ptr<Object> protocol = factory.Create<Object>();
+    node->AggregateObject(protocol);
+}
+
+void OspfHelper::Install(Ptr<Node> node){
+    CreateAndAggregateObjectFromTypeId(node, "ns3::OspfL4Protocol");
+}
+
 /*
 int64_t OspfHelper::AssignStreams(NodeContainer c, int64_t stream)
 {

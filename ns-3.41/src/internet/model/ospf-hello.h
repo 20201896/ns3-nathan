@@ -5,6 +5,7 @@
 #include "ospf-neighbor-table.h"
 
 namespace ns3 {
+class OspfNeighborTable;
 
 class OspfHello : public OspfHeader{
 public:

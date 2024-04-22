@@ -78,15 +78,12 @@ int main(int argc, char** argv) {
     printf("Hello World");
     OspfHelper ospfHelper;
 
-    ospfHelper.AssignAreaNumber(r1, 0);
-    ospfHelper.AssignAreaNumber(r2, 0);
-
-    Ipv4ListRoutingHelper listRH;
-    listRH.Add(ospfHelper, 0);
+    Ipv4ListRoutingHelper routingHelperList;
+    routingHelperList.Add(ospfHelper, 0);
 
     InternetStackHelper internet;
     internet.SetIpv6StackInstall(false);
-    internet.SetRoutingHelper(listRH);
+    internet.SetRoutingHelper(routingHelperList);
     internet.Install(nc_r1_r2);
 
     InternetStackHelper internetNodes;
@@ -116,6 +113,12 @@ int main(int argc, char** argv) {
     if(printRoutingTables) {
 
     }
+
+    ospfHelper.Install(r1);
+    ospfHelper.Install(r2);
+
+    ospfHelper.AssignAreaNumber(r1, 0);
+    ospfHelper.AssignAreaNumber(r2, 0);
 
     NS_LOG_INFO("Create Applications.");
     uint32_t packetSize = 1024;

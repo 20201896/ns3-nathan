@@ -28,10 +28,14 @@ class OspfHelper : public Ipv4RoutingHelper{
 
         void AssignAreaNumber(Ptr<Node>, int);
 
+        void Install(Ptr<Node> node);
+
         //void SetInterfaceMetric(Ptr<Node> node, uint32_t interface, uint8_t metric);
 
         //void SetGatewayRouter(Ptr<Node> node, Ipv4Address nextHop, uint32_t interface);
             //route to lead out of subnet
+    protected:
+        void CreateAndAggregateObjectFromTypeId(Ptr<Node> node, const std::string typeId);
 
     private:
         ObjectFactory m_factory;

@@ -25,8 +25,6 @@
 #include "ns3/packet.h"
 #include "ns3/ptr.h"
 #include "ns3/node.h"
-#include "ospf-neighbor-table.h"
-#include "ospf-header.h"
 #include "ospf-hello.h"
 
 #include <stdint.h>
@@ -43,6 +41,10 @@ class Ipv4EndPoint;
 class Ipv6EndPointDemux;
 class Ipv6EndPoint;
 class NetDevice;
+class OspfNeighborTable;
+class OspfHello;
+class OspfHeader;
+class OspfRouting;
 
 
 class OspfL4Protocol : public IpL4Protocol {
