@@ -1,3 +1,6 @@
+#ifndef OSPF_HELPER_H
+#define OSPF_HELPER_H
+
 #include "ipv4-routing-helper.h"
 
 #include "ns3/node-container.h"
@@ -45,3 +48,5 @@ class OspfHelper : public Ipv4RoutingHelper{
 };
 
 }
+
+#endif

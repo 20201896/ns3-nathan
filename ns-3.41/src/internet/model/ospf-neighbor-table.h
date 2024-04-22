@@ -1,3 +1,6 @@
+#ifndef OSPF_NEIGHBOR_TABLE_H
+#define OSPF_NEIGHBOR_TABLE_H
+
 #include <stdint.h>
 #include <string>
 #include "ipv4.h"
@@ -31,3 +34,5 @@ private:
 };
 
 }
+
+#endif

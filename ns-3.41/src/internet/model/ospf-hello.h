@@ -1,3 +1,6 @@
+#ifndef OSPF_HELLO_H
+#define OSPF_HELLO_H
+
 #include <stdint.h>
 #include <string>
 
@@ -24,3 +27,4 @@ private:
 };
 
 }
+#endif

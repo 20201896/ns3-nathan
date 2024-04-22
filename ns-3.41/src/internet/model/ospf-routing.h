@@ -1,3 +1,6 @@
+#ifndef OSPF_ROUTING_H
+#define OSPF_ROUTING_H
+
 #include "ipv4-routing-protocol.h"
 #include "ospf-l4-protocol.h"
 
@@ -48,3 +51,5 @@ private:
     Time m_next_down_timer;
 };
 }
+
+#endif
