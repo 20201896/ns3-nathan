@@ -1,3 +1,12 @@
+/*
+ *  Copyright (c) 2024 Liverpool Hope University, UK
+ *  Authors:
+ *      Nathan Nunes
+ *
+ *  File: ospf-helper.h
+ *
+ */
+
 #include "ospf-helper.h"
 #include "ns3/ospf-routing.h"
 

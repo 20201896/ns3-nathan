@@ -1,3 +1,12 @@
+/*
+ *  Copyright (c) 2024 Liverpool Hope University, UK
+ *  Authors:
+ *      Nathan Nunes
+ *
+ *  File: ospf-routing.h
+ *
+ */
+
 #ifndef OSPF_ROUTING_H
 #define OSPF_ROUTING_H
 

@@ -1,3 +1,12 @@
+/*
+ *  Copyright (c) 2024 Liverpool Hope University, UK
+ *  Authors:
+ *      Nathan Nunes
+ *
+ *  File: ospf-routing.cc
+ *
+ */
+
 #include "ospf-routing.h"
 #include "ospf-l4-protocol.h"
 #include "ospf-header.h"

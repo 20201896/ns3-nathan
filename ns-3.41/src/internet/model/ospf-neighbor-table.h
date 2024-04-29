@@ -1,3 +1,12 @@
+/*
+ *  Copyright (c) 2024 Liverpool Hope University, UK
+ *  Authors:
+ *      Nathan Nunes
+ *
+ *  File: ospf-neighbor-table.h
+ *
+ */
+
 #ifndef OSPF_NEIGHBOR_TABLE_H
 #define OSPF_NEIGHBOR_TABLE_H
 

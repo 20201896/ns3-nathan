@@ -1,3 +1,12 @@
+/*
+ *  Copyright (c) 2024 Liverpool Hope University, UK
+ *  Authors:
+ *      Nathan Nunes
+ *
+ *  File: ospf-hello.cc
+ *
+ */
+
 #include <stdint.h>
 #include <string>
 #include "ospf-hello.h"

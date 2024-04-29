@@ -1,3 +1,12 @@
+/*
+ *  Copyright (c) 2024 Liverpool Hope University, UK
+ *  Authors:
+ *      Nathan Nunes
+ *
+ *  File: ospf-hello.h
+ *
+ */
+
 #ifndef OSPF_HELLO_H
 #define OSPF_HELLO_H
 

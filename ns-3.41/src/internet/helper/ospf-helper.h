@@ -1,3 +1,12 @@
+/*
+ *  Copyright (c) 2024 Liverpool Hope University, UK
+ *  Authors:
+ *      Nathan Nunes
+ *
+ *  File: ospf-helper.h
+ *
+ */
+
 #ifndef OSPF_HELPER_H
 #define OSPF_HELPER_H
 
