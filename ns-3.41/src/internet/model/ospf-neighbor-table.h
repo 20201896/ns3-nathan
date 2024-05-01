@@ -37,6 +37,7 @@ public:
     neighborList getCurrentNeighbors();
     void set_State(int, uint32_t);
     void delete_neighbor(uint32_t);
+    int get_State(uint32_t);
 
 private:
     neighborList m_neighbors;

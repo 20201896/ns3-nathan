@@ -254,6 +254,8 @@ class OspfL4Protocol : public IpL4Protocol {
 
     void HandleInitResponse(Ptr<Packet>, Ipv4Header, OspfHeader, Ptr<Ipv4Interface>, uint32_t);
 
+    void HandleTwoWayResponse(Ptr<Packet>, Ipv4Header, OspfHeader, Ptr<Ipv4Interface>, uint32_t);
+
   private:
     Ptr<Node> m_node;                    //!< The node this stack is associated with
     Ipv4EndPointDemux* m_endPoints;      //!< A list of IPv4 end points.

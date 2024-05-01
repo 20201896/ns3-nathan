@@ -33,6 +33,18 @@ void OspfNeighborTable::set_State(int new_state, uint32_t r_id){
     }
 }
 
+int OspfNeighborTable::get_State(uint32_t r_id){
+    int state;
+    for (auto& row : m_neighbors){
+        for (auto& neighborItems : row){
+            if (neighborItems.router_id == r_id){
+                state = neighborItems.state;
+            }
+        }
+    }
+    return state;
+}
+
 void OspfNeighborTable::delete_neighbor(uint32_t r_id){
     for (auto it = m_neighbors.begin(); it != m_neighbors.end(); ++it){
         bool found = false;

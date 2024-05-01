@@ -472,6 +472,62 @@ void OspfL4Protocol::SendTwoWayPacket(Ipv4InterfaceAddress address, Ipv4Address 
     }
 }
 
+void OspfL4Protocol::HandleTwoWayResponse(Ptr<Packet> packet, Ipv4Header header, OspfHeader ospfHeader, Ptr<Ipv4Interface> interface, uint32_t incomingIf){
+    OspfHello helloHeader;
+    packet->PeekHeader(helloHeader);
+    OspfNeighborTable::neighborList neighbors = helloHeader.getNeighbors();
+    if (neighbors.empty()){
+        SendDownPacket(interface->GetAddress(incomingIf));
+    }else{
+        bool check = false;
+        for (const auto& row : neighbors){
+            for (const auto& neighborItems : row){
+                if (neighborItems.router_id == m_routerId){
+                    check = true;
+                }
+            }
+        }
+        if (helloHeader.getAreaId() != m_areaId){
+            check = false;
+        }
+        if (check){
+            bool neighbor_exist = true;
+            OspfNeighborTable::neighborList m_current_neighbors = m_neighbor_table.getCurrentNeighbors();
+            if (m_current_neighbors.empty()){
+                neighbor_exist = false;
+            }else{
+                bool iterator_check = false;
+                for (const auto& row : m_current_neighbors){
+                    for (const auto& neighborItems : row){
+                        if (neighborItems.router_id == helloHeader.getRouterId()){
+                            iterator_check = true;
+                        }
+                    }
+                }
+                if (iterator_check){
+                    neighbor_exist = true;
+                }else{
+                    neighbor_exist = false;
+                }
+            }
+            if (neighbor_exist) {
+                //check if state is already TWO_WAY if so needs to proceed to Exchange State else send TWO_WAY packet
+                int state = m_neighbor_table.get_State(m_routerId);
+                if (state == States::TWO_WAY){
+                    //Start Exchange state....send DBD packets
+                }else{
+                    m_neighbor_table.set_State(States::TWO_WAY, m_routerId);
+                    SendTwoWayPacket(interface->GetAddress(incomingIf), header.GetSource());
+                }
+            }else{
+                //should send DOWN state packet as entry should already be recorded
+                SendDownPacket(interface->GetAddress(incomingIf));
+            }
+        }else{
+            SendDownPacket(interface->GetAddress(incomingIf));
+        }
+    }
+}
 
 
 void OspfL4Protocol::SetOspfAreaType(int area_id){
