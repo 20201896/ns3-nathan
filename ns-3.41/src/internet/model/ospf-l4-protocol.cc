@@ -242,6 +242,9 @@ OspfL4Protocol::Receive(Ptr<Packet> packet, const Ipv4Header& header, Ptr<Ipv4In
     if (ospfHeader.GetState() == States::INIT){
         HandleInitResponse(packet, header, ospfHeader, interface, incomingIf);
     }
+    if (ospfHeader.GetState() == States::TWO_WAY){
+        HandleTwoWayResponse(packet, header, ospfHeader, interface, incomingIf);
+    }
 
     return IpL4Protocol::RX_OK;
 }
