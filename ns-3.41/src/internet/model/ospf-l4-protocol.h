@@ -269,8 +269,9 @@ class OspfL4Protocol : public IpL4Protocol {
     OspfNeighborTable m_neighbor_table;
     uint32_t m_routerId;
     int m_areaId;
-    //Time m_down_timer;
-    //Time m_next_down_timer;
+    Time m_helloTimer;
+    Time m_deadTimer;
+    Time m_waitTimer;
 };
 
 }

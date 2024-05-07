@@ -63,7 +63,22 @@ TypeId OspfL4Protocol::GetTypeId() {
         tid = TypeId("ns3::OspfL4Protocol")
                 .SetParent<IpL4Protocol>()
                 .SetGroupName("Internet")
-                .AddConstructor<OspfL4Protocol>();
+                .AddConstructor<OspfL4Protocol>()
+                .AddAttribute("HelloTimer",
+                              "The time between two Hello Packets in the DOWN state.",
+                              TimeValue(Seconds(10)),
+                              MakeTimeAccessor(&OspfL4Protocol::m_helloTimer),
+                              MakeTimeChecker());
+        .AddAttribute("RouterDead",
+                      "The time required for a link to be declared as dead.",
+                      TimeValue(Seconds(40)),
+                      MakeTimeAccessor(&OspfL4Protocol::m_deadTimer),
+                      MakeTimeChecker());
+        .AddAttribute("WaitTimer",
+                      "The time the router waits before transitioning to a lower adjacency state.",
+                      TimeValue(Seconds(40)),
+                      MakeTimeAccessor(&OspfL4Protocol::m_waitTimer),
+                      MakeTimeChecker());
     return tid;
 }
 
@@ -499,6 +514,7 @@ void OspfL4Protocol::HandleTwoWayResponse(Ptr<Packet> packet, Ipv4Header header,
             if (m_current_neighbors.empty()){
                 neighbor_exist = false;
             }else{
+                //check routers own neighbor table to see if entry for neighbor exists
                 bool iterator_check = false;
                 for (const auto& row : m_current_neighbors){
                     for (const auto& neighborItems : row){
