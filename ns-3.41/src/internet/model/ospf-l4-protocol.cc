@@ -63,22 +63,7 @@ TypeId OspfL4Protocol::GetTypeId() {
         tid = TypeId("ns3::OspfL4Protocol")
                 .SetParent<IpL4Protocol>()
                 .SetGroupName("Internet")
-                .AddConstructor<OspfL4Protocol>()
-                .AddAttribute("HelloTimer",
-                              "The time between two Hello Packets in the DOWN state.",
-                              TimeValue(Seconds(10)),
-                              MakeTimeAccessor(&OspfL4Protocol::m_helloTimer),
-                              MakeTimeChecker());
-        .AddAttribute("RouterDead",
-                      "The time required for a link to be declared as dead.",
-                      TimeValue(Seconds(40)),
-                      MakeTimeAccessor(&OspfL4Protocol::m_deadTimer),
-                      MakeTimeChecker());
-        .AddAttribute("WaitTimer",
-                      "The time the router waits before transitioning to a lower adjacency state.",
-                      TimeValue(Seconds(40)),
-                      MakeTimeAccessor(&OspfL4Protocol::m_waitTimer),
-                      MakeTimeChecker());
+                .AddConstructor<OspfL4Protocol>();
     return tid;
 }
 
