@@ -43,12 +43,12 @@ public:
     void PrintRoutingTable(Ptr<OutputStreamWrapper> stream,
                            Time::Unit unit = Time::S) const override;
     void SetArea(int);
+    void SetInterfaceMetric(uint32_t, uint8_t);
 
 protected:
     void DoInitialize() override;
     void DoDispose() override;
 private:
-    void SendDownUpdate();
 
     Ptr<OspfL4Protocol> m_ospf_protocol;
     std::set<uint32_t> m_interfaceExclusions;   //interface
@@ -56,8 +56,7 @@ private:
 
     Ipv4Address dest_add;
 
-    Time m_down_timer;
-    Time m_next_down_timer;
+    std::map<uint32_t, uint8_t> m_interfaceMetrics;
 };
 }
 

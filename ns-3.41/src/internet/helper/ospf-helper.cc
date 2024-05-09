@@ -22,7 +22,7 @@ namespace ns3
 {
 OspfHelper::OspfHelper()
 {
-    m_factory.SetTypeId("ns3::OspfL4Protocol");
+    m_factory.SetTypeId("ns3::OspfRouting");
 }
 
 OspfHelper::OspfHelper(const OspfHelper& o)
@@ -51,6 +51,16 @@ Ptr<Ipv4RoutingProtocol> OspfHelper::Create(Ptr<Node> node) const
     if (it != m_interfaceExclusions.end())
     {
         ospf->SetInterfaceExclusions(it->second);
+    }
+
+    auto iter = m_interfaceMetrics.find(node);
+
+    if (iter != m_interfaceMetrics.end())
+    {
+        for (auto subiter = iter->second.begin(); subiter != iter->second.end(); subiter++)
+        {
+            ospf->SetInterfaceMetric(subiter->first, subiter->second);
+        }
     }
 
     node->AggregateObject(ospf);
@@ -100,44 +110,4 @@ void OspfHelper::CreateAndAggregateObjectFromTypeId(Ptr<Node> node, const std::s
 void OspfHelper::Install(Ptr<Node> node){
     CreateAndAggregateObjectFromTypeId(node, "ns3::OspfL4Protocol");
 }
-
-/*
-int64_t OspfHelper::AssignStreams(NodeContainer c, int64_t stream)
-{
-    int64_t currentStream = stream;
-    Ptr<Node> node;
-    for (auto i = c.Begin(); i != c.End(); ++i)
-    {
-        node = (*i);
-        Ptr<Ipv4> ipv4 = node->GetObject<Ipv4>();
-        NS_ASSERT_MSG(ipv4, "Ipv4 not installed on node");
-        Ptr<Ipv4RoutingProtocol> proto = ipv4->GetRoutingProtocol();
-        NS_ASSERT_MSG(proto, "Ipv4 routing not installed on node");
-        Ptr<OspfRouting> ospf = DynamicCast<OspfRouting>(proto);
-        if (ospf)
-        {
-            currentStream += ospf->AssignStreams(currentStream);
-            continue;
-        }
-        Ptr<Ipv4ListRouting> list = DynamicCast<Ipv4ListRouting>(proto);
-        if (list)
-        {
-            int16_t priority;
-            Ptr<Ipv4RoutingProtocol> listProto;
-            Ptr<OspfRouting> listOspf;
-            for (uint32_t j = 0; j < list->GetNRoutingProtocols(); j++)
-            {
-                listProto = list->GetRoutingProtocol(j, priority);
-                listOspf = DynamicCast<OspfHelper>(listProto);
-                if (listOspf)
-                {
-                    currentStream += listOspf->AssignStreams(currentStream);
-                    break;
-                }
-            }
-        }
-    }
-    return (currentStream - stream);
-}
-*/
 }

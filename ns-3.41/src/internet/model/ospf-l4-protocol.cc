@@ -44,12 +44,10 @@ const uint8_t OspfL4Protocol::PROTOCOL_NUMBER = 89;
 // Constructor
 OspfL4Protocol::OspfL4Protocol()
         : m_endPoints(new Ipv4EndPointDemux()),
-          m_endPoints6(new Ipv6EndPointDemux()),
-          m_neighbor_table(OspfNeighborTable())
+          m_endPoints6(new Ipv6EndPointDemux())
 {
     NS_LOG_FUNCTION(this);
-    Ptr<Node> node = this->GetObject<Node>();
-    m_routerId = node->GetId();
+    m_neighbor_table = OspfNeighborTable();
 }
 
 // Destructor
@@ -70,6 +68,7 @@ TypeId OspfL4Protocol::GetTypeId() {
 // Set the owning Node
 void OspfL4Protocol::SetNode(Ptr<Node> node) {
     m_node = node;
+    m_routerId = node->GetId();
 }
 
 /******************************************************************************

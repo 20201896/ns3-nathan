@@ -19,6 +19,10 @@
 
 namespace ns3
 {
+
+NS_LOG_COMPONENT_DEFINE("OspfRouting");
+NS_OBJECT_ENSURE_REGISTERED(OspfRouting);
+
 OspfRouting::OspfRouting() : m_ipv4(nullptr){
     m_ospf_protocol = CreateObject<OspfL4Protocol>();
 }
@@ -66,7 +70,8 @@ void OspfRouting::PrintRoutingTable(Ptr<OutputStreamWrapper> stream, Time::Unit 
 
 void OspfRouting::DoInitialize() {
     //NS_LOG_FUNCTION(this);
-    m_down_timer = Time(10);
+    Ptr<Node> node = this->GetObject<Node>();
+    m_ospf_protocol->SetNode(node);
     m_ospf_protocol->SetIpv4(m_ipv4);
     m_ospf_protocol->SetExclusions(m_interfaceExclusions);
     m_ospf_protocol->startDownState();
@@ -99,11 +104,14 @@ void OspfRouting::SetIpv4(Ptr<Ipv4> ipv4){
     }
 }
 
-void SendDownUpdate(){
-
-}
 void OspfRouting::SetArea(int a_id) {
     m_ospf_protocol->SetOspfAreaType(a_id);
+}
+
+void OspfRouting::SetInterfaceMetric(uint32_t interface, uint8_t metric)
+{
+    m_interfaceMetrics[interface] = metric;
+
 }
 
 }

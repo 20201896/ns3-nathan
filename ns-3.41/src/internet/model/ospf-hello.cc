@@ -13,6 +13,8 @@
 
 namespace ns3 {
 
+NS_OBJECT_ENSURE_REGISTERED(OspfHello);
+
 OspfHello::OspfHello() {
 
 }
